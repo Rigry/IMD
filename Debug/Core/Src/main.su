@@ -1,0 +1,76 @@
+gthr-default.h:229:1:int __gthread_key_delete(__gthread_key_t)	16	static
+subscriber.h:23:10:void Publisher::subscribe(Subscriber*)	16	static
+subscriber.h:24:10:void Publisher::unsubscribe(Subscriber*)	16	static
+subscriber.h:25:10:void Publisher::notify()	24	static
+subscriber.h:19:8:Publisher::Publisher()	16	static
+timers.h:30:12:TickUpdater::Subtick::Subtick()	16	static
+timers.h:23:5:TickUpdater::TickUpdater()	16	static
+timers.h:37:6:void HAL_IncTick()	8	static
+timers.h:46:9:void TickSubscriber::subscribe()	16	static
+timers.h:53:9:void TickSubscriber::unsubscribe()	16	static
+subscriber.h:15:8:constexpr Subscriber::Subscriber()	16	static
+timers.h:42:7:TickSubscriber::TickSubscriber()	16	static
+timers.h:71:3:Timer::Timer(uint32_t)	16	static
+timers.h:92:8:virtual void Timer::notify()	16	static
+timers.h:116:51:TickUpdater::interrupt()::<lambda()>	16	static
+timers.h:113:6:void TickUpdater::interrupt()	16	static
+timers.h:122:6:void Timer::start(uint32_t)	16	static
+timers.h:128:6:bool Timer::event()	16	static
+timers.h:147:6:void Timer::stop()	16	static
+timers.h:152:10:bool Timer::done()	16	static
+timers.h:153:10:void Timer::pause()	16	static
+timers.h:154:10:void Timer::start()	16	static
+timers.h:155:10:bool Timer::isCount()	16	static
+timers.h:156:10:uint32_t Timer::timePassed()	16	static
+timers.h:157:10:uint32_t Timer::timeLeft()	16	static
+timers.h:158:10:bool Timer::isGreater(uint32_t)	16	static
+interrupt.h:14:10:void Interrupt::subscribe(Interrupting*)	16	static
+interrupt.h:21:10:void Interrupt::interrupt()	16	static
+adc.h:24:7:void ADC_::adc_injected_interrupt()	16	static
+interrupt.h:3:8:constexpr Interrupting::Interrupting()	16	static
+adc.h:38:3:ADC_::ADC_INJ_interrupt::ADC_INJ_interrupt(ADC_::Parent&)	16	static
+adc.h:42:8:virtual void ADC_::ADC_INJ_interrupt::interrupt()	16	static
+adc.h:49:2:ADC_::ADC_(Interrupt&, uint16_t)	32	static
+adc.h:59:7:virtual void ADC_::notify()	16	static
+adc.h:66:7:void ADC_::start()	16	static
+adc.h:67:7:void ADC_::stop()	16	static
+adc.h:69:11:uint16_t ADC_::lk_value()	16	static
+adc.h:70:11:uint16_t ADC_::kz_value()	16	static
+adc.h:82:6:void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef*)	16	static
+pin.h:9:2:Pin::Pin(GPIO_TypeDef*, uint16_t)	24	static
+pin.h:16:9:void Pin::set()	16	static
+pin.h:17:9:void Pin::clear()	16	static
+pin.h:18:9:bool Pin::is_set()	16	static
+pin.h:20:9:void Pin::toggle()	16	static
+pin.h:24:9:bool Pin::operator=(bool)	16	static
+pin.h:30:9:void Pin::operator^=(bool)	16	static
+pin.h:36:4:Pin::operator bool()	16	static
+can.h:190:6:void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef*)	16	static
+device.h:40:2:Device::Device(ADC_&, CAN<In_id, Out_id>&, Pin&, Pin&, Pin&, Pin&, Pin&, Pin&, Pin&, Pin&, Pin&, Pin&, Pin&, Pin&, Pin&, Pin&, Pin&, Pin&)	24	static
+device.h:53:7:void Device::operator()()	24	static
+main.cpp:71:5:int main()	632	static
+main.cpp:145:6:void SystemClock_Config()	96	static
+main.cpp:191:13:void MX_ADC2_Init()	40	static
+main.cpp:249:13:void MX_CAN_Init()	48	static
+main.cpp:304:13:void MX_GPIO_Init()	40	static
+main.cpp:393:6:void Error_Handler()	4	static,ignoring_inline_asm
+static_vector.h:22:10:void Static_vector<T, size_>::push_back(T) [with T = Subscriber*; unsigned int size_ = 12]	16	static
+static_vector.h:27:10:void Static_vector<T, size_>::remove(T) [with T = Subscriber*; unsigned int size_ = 12]	24	static
+static_vector.h:20:13:uint8_t Static_vector<T, size_>::cend() const [with T = Subscriber*; unsigned int size_ = 12]	16	static
+static_vector.h:44:7:T Static_vector<T, size_>::operator[](size_t) const [with T = Subscriber*; unsigned int size_ = 12]	16	static
+static_vector.h:18:5:Static_vector<T, size_>::Static_vector() [with T = Subscriber*; unsigned int size_ = 12]	16	static
+systick.h:13:30:void SystemTick::initInterrupt() [with short unsigned int us = 1000]	16	static
+timers.h:107:13:void every_qty_cnt_call(size_t&, size_t, Function) [with Function = TickUpdater::interrupt()::<lambda()>]	24	static
+hysteresis.h:7:5:Hysteresis<T, U>::Hysteresis(const T&, U, U, bool) [with T = short unsigned int; U = short unsigned int]	24	static
+can.h:163:8:bool CAN<InID_t, OutID_t>::is_work() [with InID_t = In_id; OutID_t = Out_id]	16	static
+hysteresis.h:11:5:Hysteresis<T, U>::operator bool() [with T = short unsigned int; U = short unsigned int]	16	static
+can.h:92:3:CAN<InID_t, OutID_t>::CAN(Pin&, Interrupt&, uint16_t) [with InID_t = In_id; OutID_t = Out_id]	24	static
+can.h:122:7:CAN<InID_t, OutID_t>::can_rx_interrupt::can_rx_interrupt(CAN<InID_t, OutID_t>::Parent&) [with InID_t = In_id; OutID_t = Out_id]	16	static
+main.cpp:402:1:void __static_initialization_and_destruction_0(int, int)	16	static
+can.h:175:8:void CAN<InID_t, OutID_t>::notify() [with InID_t = In_id; OutID_t = Out_id]	16	static
+can.h:125:12:void CAN<InID_t, OutID_t>::can_rx_interrupt::interrupt() [with InID_t = In_id; OutID_t = Out_id]	16	static
+can.h:129:8:void CAN<InID_t, OutID_t>::transmit() [with InID_t = In_id; OutID_t = Out_id]	24	static
+can.h:173:8:void CAN<InID_t, OutID_t>::stop_transmit() [with InID_t = In_id; OutID_t = Out_id]	16	static
+can.h:144:8:void CAN<InID_t, OutID_t>::receive() [with InID_t = In_id; OutID_t = Out_id]	16	static
+can.h:165:8:void CAN<InID_t, OutID_t>::start_transmit() [with InID_t = In_id; OutID_t = Out_id]	16	static
+main.cpp:402:1:cpp)	8	static
