@@ -96,6 +96,8 @@ int main(void)
   MX_ADC2_Init();
   /* USER CODE BEGIN 2 */
 
+  // создание объектов
+
   decltype(auto) led_red     = Pin{GPIOB, LED_RED_Pin        };
   decltype(auto) led_green   = Pin{GPIOB, LED_GREEN_Pin      };
   decltype(auto) on          = Pin{GPIOC, ON_Pin             };
