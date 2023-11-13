@@ -37,13 +37,13 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  16 .debug_macro  0001d9b2  00000000  00000000  00033e20  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   0000a1bf  00000000  00000000  000517d2  2**0
+ 17 .debug_line   0000a1b4  00000000  00000000  000517d2  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    000a3b67  00000000  00000000  0005b991  2**0
+ 18 .debug_str    000a3b5d  00000000  00000000  0005b986  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000053  00000000  00000000  000ff4f8  2**0
+ 19 .comment      00000053  00000000  00000000  000ff4e3  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  000029e4  00000000  00000000  000ff54c  2**2
+ 20 .debug_frame  000029e4  00000000  00000000  000ff538  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -2037,6 +2037,8 @@ int main(void)
   MX_ADC2_Init();
  8000fb4:	f000 f950 	bl	8001258 <_ZL12MX_ADC2_Initv>
   /* USER CODE BEGIN 2 */
+
+  // создание объектов
 
   decltype(auto) led_red     = Pin{GPIOB, LED_RED_Pin        };
  8000fb8:	f507 7308 	add.w	r3, r7, #544	; 0x220
