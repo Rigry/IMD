@@ -65,3 +65,58 @@ struct Memory {
     Iterator begin() {return Iterator{pointer};}
     Iterator end()   {return Iterator{pointer + size};}
 };
+
+template <class Data, FLASH_::Sector ... sector>
+class Flash_updater_impl : private TickSubscriber
+{
+public:
+    Flash_updater_impl(Data*);
+    Flash_updater_impl(); // не читает данные
+    ~Flash_updater_impl() { stop(); }
+    void start() { tick_subscribe(); }
+    void stop()  { tick_unsubscribe(); }
+    void set_data(Data* v) { original = v; }
+    void read_to(Data* data) {
+        original = data;
+        // flash.lock(); // check if need
+        if (not is_read())
+            *data = Data{};
+    }
+    bool done() {
+        auto v = done_;
+        done_ = false;
+        return v;
+    }
+private:
+    FLASH_&  flash   {mcu::make_reference<mcu::Periph::FLASH>()};
+    Data*    original;
+    uint8_t  copy[sizeof(Data)];
+    static constexpr auto sectors {std::array{sector...}} ;
+    SizedInt<sizeof...(sector)> current {};
+    bool need_erase[sizeof...(sector)] {};
+    int  erase_index {0};
+    std::array<Memory, sizeof...(sector)> memory;
+    Memory::Iterator memory_offset{nullptr};
+    bool done_ {false};
+
+
+    enum State {
+      check_changes,
+      start_write,
+      check_write,
+      erase,
+      check_erase,
+      rewrite
+    };
+    volatile State state {check_changes};
+    volatile State return_state {check_changes};
+    volatile uint8_t writed_data; // TODO: проверить без volatile
+    SizedInt<sizeof(Data), uint8_t> data_offset {};
+
+    // возвращает true , если данные прочитаны
+    //            false, если нет или данные не полные
+    bool is_read();
+    void notify() override;
+    bool is_need_erase();
+
+};
