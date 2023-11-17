@@ -147,10 +147,7 @@ public:
 		switch(RxHeader.StdId) {
 			case 0x17:
 				inID.control.ignition = RxData[0] & (1 << 0);
-				start_transmit();
-			break;
-			case 0x11:
-				inID.control.HV_off = RxData[0] & (1 << 0);
+				inID.control.HV_off   = RxData[0] & (1 << 6);
 				start_transmit();
 			break;
 			case 0x10:

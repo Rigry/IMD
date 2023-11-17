@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "timers.h"
+//#include "flash.h"
 
 /* USER CODE END Includes */
 
@@ -96,6 +97,20 @@ int main(void)
   MX_ADC2_Init();
   /* USER CODE BEGIN 2 */
 
+//  struct Flash_data {
+//       uint8_t address   = 10;
+//       uint8_t baudrate  = 0;
+//       uint8_t parity    = 0;
+//       uint8_t stop_bits = 0;
+//       uint8_t version   = 10;
+//       uint16_t uv_level_max = 0x0100;
+//    }flash;
+//
+//    [[maybe_unused]] auto _ = Flash_updater<
+//         mcu::FLASH_::Sector::_31
+//       , mcu::FLASH_::Sector::_30
+//    >::make (&flash);
+
   // создание объектов
 
   decltype(auto) led_red     = Pin{GPIOB, LED_RED_Pin        };
@@ -105,8 +120,8 @@ int main(void)
   decltype(auto) relay_r     = Pin{GPIOC, RELAY_R_Pin        };
   decltype(auto) led_can     = Pin{GPIOC, LED_CAN_Pin        };
   decltype(auto) test        = Pin{GPIOA, TEST_Pin           };
-  decltype(auto) res         = Pin{GPIOA, res_Pin            };
-  decltype(auto) fb_res      = Pin{GPIOC, fb_res_Pin         };
+//  decltype(auto) res         = Pin{GPIOA, res_Pin            };
+//  decltype(auto) fb_res      = Pin{GPIOC, fb_res_Pin         };
   decltype(auto) norma       = Pin{GPIOC, norma_Pin          };
   decltype(auto) fb_norma    = Pin{GPIOC, fb_norma_Pin       };
   decltype(auto) first_level = Pin{GPIOD, first_level_Pin    };
@@ -120,9 +135,9 @@ int main(void)
 
 //  State state{};
 
-  decltype(auto) adc = ADC_ {adc_injected_callback, 50};
+  decltype(auto) adc = ADC_ {adc_injected_callback, 75};
 
-  decltype(auto) can = CAN<In_id, Out_id>{led_can, interrupt_can_rx, 200};
+  decltype(auto) can = CAN<In_id, Out_id>{led_can, interrupt_can_rx, 100};
 
   decltype(auto) device = Device{adc, can, led_red, led_green, on, relay, relay_r, test, norma, fb_norma, first_level, fb_first, second_level, fb_second, KZ_plus, fb_KZ_plus, KZ_minus, fb_KZ_minus};
 

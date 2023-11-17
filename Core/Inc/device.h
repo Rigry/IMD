@@ -64,7 +64,7 @@ public:
 			can.outID.state.HV_off = can.inID.control.HV_off;
 			can.outID.state.ignition = can.inID.control.ignition;
 
-			if(not delay_ and not can.inID.control.HV_off and can.inID.control.ignition) {
+			if(not delay_ and can.inID.control.HV_off and can.inID.control.ignition) {
 
 				if(can.inID.control.test) {
 					check = true;

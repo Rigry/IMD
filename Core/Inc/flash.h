@@ -3,9 +3,10 @@
 #include <cstring> // std::memcpy
 #include <algorithm>
 #include <iterator>
-//#include "periph_flash.h"
+#include "flash_f1.h"
 #include "timers.h"
 
+using FLASH_ = mcu::FLASH_;
 
 
 template<size_t n, class Int = size_t>
@@ -66,15 +67,15 @@ struct Memory {
     Iterator end()   {return Iterator{pointer + size};}
 };
 
-template <class Data, FLASH_::Sector ... sector>
+template <class Data, FLASH_::Sector sector_1, FLASH_::Sector sector_2>
 class Flash_updater_impl : private TickSubscriber
 {
 public:
     Flash_updater_impl(Data*);
     Flash_updater_impl(); // не читает данные
     ~Flash_updater_impl() { stop(); }
-    void start() { tick_subscribe(); }
-    void stop()  { tick_unsubscribe(); }
+    void start() { subscribe(); }
+    void stop()  { unsubscribe(); }
     void set_data(Data* v) { original = v; }
     void read_to(Data* data) {
         original = data;
@@ -88,14 +89,14 @@ public:
         return v;
     }
 private:
-    FLASH_&  flash   {mcu::make_reference<mcu::Periph::FLASH>()};
+    FLASH_&  flash;
     Data*    original;
     uint8_t  copy[sizeof(Data)];
-    static constexpr auto sectors {std::array{sector...}} ;
-    SizedInt<sizeof...(sector)> current {};
-    bool need_erase[sizeof...(sector)] {};
+    static constexpr auto sectors { std::array<FLASH_::Sector, 2>{sector_1, sector_2} };
+    SizedInt<2> current {};
+    bool need_erase[2] {};
     int  erase_index {0};
-    std::array<Memory, sizeof...(sector)> memory;
+    std::array<Memory, 2> memory;
     Memory::Iterator memory_offset{nullptr};
     bool done_ {false};
 
@@ -120,3 +121,229 @@ private:
     bool is_need_erase();
 
 };
+
+
+template<FLASH_::Sector sector_1, FLASH_::Sector sector_2>
+struct Flash_updater {
+    template<class Data>
+    static auto make(Data* data) {
+        return Flash_updater_impl<Data,sector_1, sector_2>{data};
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+template <class Data, FLASH_::Sector sector_1, FLASH_::Sector sector_2>
+Flash_updater_impl<Data, sector_1, sector_2>::Flash_updater_impl()
+    : original {nullptr}
+    , memory {
+    	std::array<Memory, 2>{
+        Memory (
+              reinterpret_cast<Word*>(FLASH_::template address<sector_1>())
+            , FLASH_::template size<sector_1>() / 2
+        ),
+        Memory(
+			 reinterpret_cast<Word*>(FLASH_::template address<sector_2>())
+			,FLASH_::template size<sector_2>() / 2)
+    	}
+    }
+    , memory_offset {memory[0].begin()}
+{
+    static_assert (
+        sizeof(Data) < 255,
+        "Размер сохраняемой структуры должен быть менее 255 байт"
+    );
+//    static_assert (
+//        std::is_trivially_copyable<Data>,
+//        "Можно сохранять только тривиально копируемую структуру"
+//    );
+//    static_assert (
+//        sizeof...(sector) > 1,
+//        "\033[7;33mНеобходимо указать не менее двух секторов для записи\033[0m"
+//    );
+}
+
+
+
+template <class Data, FLASH_::Sector sector_1, FLASH_::Sector sector_2>
+Flash_updater_impl<Data, sector_1, sector_2>::Flash_updater_impl(Data* data)
+    : Flash_updater_impl{}
+{
+    original = data;
+    // flash.lock(); // check if need
+    read_to (data);
+    subscribe();
+}
+
+
+
+template <class Data, FLASH_::Sector sector_1, FLASH_::Sector sector_2>
+bool Flash_updater_impl<Data, sector_1, sector_2>::is_read()
+{
+    // обнуляем буфер перед заполнением
+    std::fill (std::begin(copy), std::end(copy), 0xFF);
+
+    // чтение данных в копию data в виде массива и поиск пустой ячейки
+    bool byte_readed[sizeof(Data)] {};
+    auto is_all_readed = [&]{
+        return std::all_of (std::begin(byte_readed), std::end(byte_readed), [](auto& v){return v;});
+    };
+    flash.unlock();
+    for (size_t i{0}; i < memory.size(); i++) {
+        memory_offset = std::find_if(memory[i].begin(), memory[i].end()
+            , [&](auto& word) {
+                auto& pair = word.pair;
+                if (pair.offset < sizeof(Data)) {
+                    copy[pair.offset] = pair.value;
+                    byte_readed[pair.offset] = true;
+                    return false;
+                }
+                return word.data == 0xFFFF;
+            }
+        );
+        if (memory_offset == memory[i].begin()) {
+            current = i;
+            continue;
+        }
+        if (memory_offset != memory[i].end()) {
+            current = i;
+            if (is_all_readed())
+                break;
+        } else {
+            need_erase[i] = true;
+        }
+    }
+
+    // прочитали всё но так и не нашли пустую ячейку
+    if (memory_offset == memory[current].end()) {
+        need_erase[current] = true;
+        current = 0;
+        memory_offset = memory[current].begin();
+    }
+
+    auto all_readed = is_all_readed();
+    if (all_readed) {
+        std::memcpy (original, copy, sizeof(copy));
+        return_state = check_changes;
+    } else {
+        need_erase[current] = true;
+        return_state = rewrite;
+    }
+
+    // проверить все пустые страницы, что они действительно пустые
+    for (size_t i{0}; i < memory.size(); i++) {
+        if (not need_erase[i] and i != current) {
+            need_erase[i] = std::any_of (memory[i].begin(), memory[i].end()
+                , [](auto& word){ return word.data != 0xFFFF; }
+            );
+        }
+    }
+
+    if (std::any_of(std::begin(need_erase), std::end(need_erase), [](auto& v){return v;})) {
+        state = erase;
+    }
+
+    flash.lock();
+    return all_readed;
+}
+
+
+
+template <class Data, FLASH_::Sector sector_1, FLASH_::Sector sector_2>
+void Flash_updater_impl<Data, sector_1, sector_2>::notify()
+{
+    // приведение к массиву для удобство работы с копией данных
+    uint8_t* original = reinterpret_cast<uint8_t*>(this->original);
+
+    // реализация автоматом
+    switch (state) {
+
+    case check_changes:
+        if (original[data_offset] == copy[data_offset]) {
+            data_offset++;
+            done_ = data_offset == 0;
+        } else {
+            state = start_write;
+        }
+        break;
+
+    case start_write:
+        if ( not flash.is_busy() and flash.is_lock() ) {
+            flash.unlock();
+                flash.set_progMode();
+            writed_data = original[data_offset];
+            memory_offset->data = Pair{data_offset, writed_data};
+            state = check_write;
+        }
+        break;
+
+    case check_write:
+        if ( flash.is_endOfProg() ) {
+            flash.clear_flag_endOfProg()
+                .lock();
+            copy[data_offset] = writed_data;
+            if (++memory_offset != memory[current].end()) {
+                state = return_state;
+            } else {
+                need_erase[current] = true;
+                current++;
+                memory_offset = memory[current].begin();
+                data_offset = 0;
+                state = start_write;
+                return_state = rewrite;
+            }
+        }
+        break;
+
+    case erase:
+        if ( not flash.is_busy() and flash.is_lock() ) {
+            auto it = std::find(std::begin(need_erase), std::end(need_erase), true);
+            if (it == std::end(need_erase)) {
+                state = return_state;
+                break;
+            }
+            erase_index = std::distance(std::begin(need_erase), it);
+            flash.unlock()
+                .start_erase(sectors[erase_index]);
+            state = check_erase;
+        }
+    break;
+
+    case check_erase:
+        if ( flash.is_endOfProg() ) {
+            flash.clear_flag_endOfProg()
+                 .lock();
+            auto verified = std::all_of(std::begin(memory[erase_index]), std::end(memory[erase_index]), [](auto word){
+                return word.data == 0xFFFF;
+            });
+            need_erase[erase_index] = not verified;
+            state = is_need_erase() ? erase : check_changes;
+        }
+    break;
+
+    case rewrite:
+        if (++data_offset) {
+            state = start_write;
+        } else {
+            state = is_need_erase() ? erase : check_changes;
+            return_state = check_changes;
+        }
+    break;
+    } // switch
+}
+
+
+
+template <class Data, FLASH_::Sector sector_1, FLASH_::Sector sector_2>
+bool Flash_updater_impl<Data, sector_1, sector_2>::is_need_erase() {
+    return std::any_of(std::begin(need_erase), std::end(need_erase), [](auto& v){return v;});
+}
