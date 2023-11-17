@@ -3626,10 +3626,10 @@ public:
  8001a60:	d027      	beq.n	8001ab2 <_ZN3CANI5In_id6Out_idE7receiveEv+0x72>
  8001a62:	2b17      	cmp	r3, #23
  8001a64:	d13a      	bne.n	8001adc <_ZN3CANI5In_id6Out_idE7receiveEv+0x9c>
-				inID.control.ignition = RxData[0] & (1 << 0);
+				inID.control.ignition = RxData[0] & (1 << 1);
  8001a66:	687b      	ldr	r3, [r7, #4]
  8001a68:	f893 304c 	ldrb.w	r3, [r3, #76]	; 0x4c
- 8001a6c:	f003 0301 	and.w	r3, r3, #1
+ 8001a6c:	f003 0302 	and.w	r3, r3, #2
  8001a70:	2b00      	cmp	r3, #0
  8001a72:	bf14      	ite	ne
  8001a74:	2301      	movne	r3, #1
