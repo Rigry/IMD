@@ -62,6 +62,9 @@ public:
 
 		if(can.is_work()) {
 			can.outID.state.HV_off = can.inID.control.HV_off;
+			if(can.outID.state.HV_off == false) {
+				led_red = false;
+			}
 			can.outID.state.ignition = can.inID.control.ignition;
 
 			if(not delay_ and can.inID.control.HV_off and can.inID.control.ignition) {
@@ -100,11 +103,24 @@ public:
 				can.outID.state.level_first = adc.leak_first_level;
 				can.outID.state.level_second = adc.leak_second_level;
 
-				can.outID.state.leak_value = adc.lk_value();
-				can.outID.state.kz_value = adc.kz_value();
+				can.outID.state.leak_value_1 = adc.lk_value() & 0b0000000011111111;
+				can.outID.state.leak_value_0 = (adc.lk_value() >> 8);
+				can.outID.state.kz_value_1 = adc.kz_value() & 0b0000000011111111;
+				can.outID.state.kz_value_0 = (adc.kz_value() >> 8);
 
 				led_green = true;
 				led_red = false;
+			} else {
+				can.outID.state.kz_on_plus = false;
+				can.outID.state.kz_on_minus = false;
+
+				can.outID.state.level_first = false;
+				can.outID.state.level_second = false;
+
+				can.outID.state.leak_value_1 = adc.lk_value() & 0b0000000011111111;
+				can.outID.state.leak_value_0 = (adc.lk_value() >> 8);
+				can.outID.state.kz_value_1 = adc.kz_value() & 0b0000000011111111;
+				can.outID.state.kz_value_0 = (adc.kz_value() >> 8);
 			}
 
 		} else {

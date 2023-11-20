@@ -23,10 +23,13 @@ struct State {
 	bool test_OK        : 1; // 5
 	bool test_FAILED    : 1; // 6
 	bool HV_off         : 1; // 7
+	//
 	bool ignition       : 1; // 8
 	uint16_t res        : 7;
-	uint16_t leak_value : 16;
-	uint16_t kz_value   : 16;
+	uint8_t leak_value_0 : 8;
+	uint8_t leak_value_1 : 8;
+	uint8_t kz_value_0   : 8;
+	uint8_t kz_value_1   : 8;
 	uint16_t res3       : 16;
 };
 
@@ -147,6 +150,9 @@ public:
 		switch(RxHeader.StdId) {
 			case 0x17:
 				inID.control.ignition = RxData[0] & (1 << 1);
+				start_transmit();
+				break;
+			case 0x18:
 				inID.control.HV_off   = RxData[0] & (1 << 6);
 				start_transmit();
 			break;
@@ -173,7 +179,6 @@ public:
 	  if (time++ >= time_refresh) {
 		  time = 0;
 		  transmit();
-
 	  }
 	  if(inID.control.on_off) stop_transmit();
   }
