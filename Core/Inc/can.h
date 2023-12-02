@@ -156,10 +156,10 @@ public:
 				inID.control.HV_off   = RxData[0] & (1 << 6);
 				start_transmit();
 			break;
-			case 0x10:
-				inID.control.test = RxData[0] & (1 << 0);
-				start_transmit();
-			break;
+//			case 0x10:
+//				inID.control.test = RxData[0] & (1 << 0);
+//				start_transmit();
+//			break;
 		}
 	}
 

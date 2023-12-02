@@ -30,6 +30,7 @@ class Device {
 	Timer timer{2000};
 	Timer delay{1500};
 	Timer blink{500};
+	Timer wait;
 
 	bool trigger{false};
 	bool delay_{true};
@@ -101,7 +102,17 @@ public:
 				can.outID.state.kz_on_minus = adc.case_minus;
 
 				can.outID.state.level_first = adc.leak_first_level;
-				can.outID.state.level_second = adc.leak_second_level;
+
+				if(adc.leak_second_level and not wait.isCount()) {
+					wait.start(5'000);
+				} else if (not adc.leak_second_level and wait.isGreater(200)) {
+					wait.stop();
+					can.outID.state.level_second = false;
+				}
+
+				if(wait.done()) {
+					can.outID.state.level_second = true;
+				}
 
 				can.outID.state.leak_value_1 = adc.lk_value() & 0b0000000011111111;
 				can.outID.state.leak_value_0 = (adc.lk_value() >> 8);
@@ -116,6 +127,7 @@ public:
 
 				can.outID.state.level_first = false;
 				can.outID.state.level_second = false;
+				wait.stop();
 
 				can.outID.state.leak_value_1 = adc.lk_value() & 0b0000000011111111;
 				can.outID.state.leak_value_0 = (adc.lk_value() >> 8);

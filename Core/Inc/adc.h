@@ -72,8 +72,8 @@ public:
 	Hysteresis<uint16_t, uint16_t> case_minus {case_value, 810, 812};
 	Hysteresis<uint16_t, uint16_t> case_plus  {case_value, 740, 742, true};
 
-	Hysteresis<uint16_t, uint16_t> leak_first_level {leak_value, 240, 250};
-	Hysteresis<uint16_t, uint16_t> leak_second_level{leak_value, 380, 880};
+	Hysteresis<uint16_t, uint16_t> leak_first_level {leak_value, 350, 400};
+	Hysteresis<uint16_t, uint16_t> leak_second_level{leak_value, 600, 680};
 
 };
 
