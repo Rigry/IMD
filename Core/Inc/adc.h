@@ -69,8 +69,8 @@ public:
 	uint16_t lk_value(){ return leak_value; }
 	uint16_t kz_value(){ return case_value; }
 
-	Hysteresis<uint16_t, uint16_t> case_minus {case_value, 810, 812};
-	Hysteresis<uint16_t, uint16_t> case_plus  {case_value, 740, 742, true};
+	Hysteresis<uint16_t, uint16_t> case_minus {case_value, 480, 500};
+	Hysteresis<uint16_t, uint16_t> case_plus  {case_value, 70, 80, true};
 
 	Hysteresis<uint16_t, uint16_t> leak_first_level {leak_value, 350, 400};
 	Hysteresis<uint16_t, uint16_t> leak_second_level{leak_value, 600, 680};
