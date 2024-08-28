@@ -63,10 +63,10 @@ void Error_Handler(void);
 #define ON_GPIO_Port GPIOC
 #define RELAY_Pin GPIO_PIN_2
 #define RELAY_GPIO_Port GPIOC
-#define Shunt__Pin GPIO_PIN_4
-#define Shunt__GPIO_Port GPIOC
-#define Shunt_C5_Pin GPIO_PIN_5
-#define Shunt_C5_GPIO_Port GPIOC
+#define Shunt_minus_Pin GPIO_PIN_4
+#define Shunt_minus_GPIO_Port GPIOC
+#define Shunt_plus_Pin GPIO_PIN_5
+#define Shunt_plus_GPIO_Port GPIOC
 #define LED_GREEN_Pin GPIO_PIN_0
 #define LED_GREEN_GPIO_Port GPIOB
 #define LED_RED_Pin GPIO_PIN_1

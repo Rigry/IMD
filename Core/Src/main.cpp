@@ -337,8 +337,8 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, LED_CAN_Pin|ON_Pin|RELAY_Pin|Shunt__Pin
-                          |Shunt_C5_Pin|norma_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, LED_CAN_Pin|ON_Pin|RELAY_Pin|Shunt_minus_Pin
+                          |Shunt_plus_Pin|norma_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, LED_GREEN_Pin|LED_RED_Pin|second_level_Pin|KZ_plus_Pin
@@ -350,10 +350,10 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(first_level_GPIO_Port, first_level_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : LED_CAN_Pin ON_Pin RELAY_Pin Shunt__Pin
-                           Shunt_C5_Pin norma_Pin */
-  GPIO_InitStruct.Pin = LED_CAN_Pin|ON_Pin|RELAY_Pin|Shunt__Pin
-                          |Shunt_C5_Pin|norma_Pin;
+  /*Configure GPIO pins : LED_CAN_Pin ON_Pin RELAY_Pin Shunt_minus_Pin
+                           Shunt_plus_Pin norma_Pin */
+  GPIO_InitStruct.Pin = LED_CAN_Pin|ON_Pin|RELAY_Pin|Shunt_minus_Pin
+                          |Shunt_plus_Pin|norma_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
