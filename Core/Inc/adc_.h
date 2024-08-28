@@ -67,13 +67,10 @@ public:
 	void stop (){ unsubscribe();}
 
 	uint16_t lk_value(){ return leak_value; }
-	uint16_t kz_value(){ return case_value; } // 1653
+	uint16_t kz_value(){ return case_value; }
 
-	Hysteresis<uint16_t, uint16_t> case_minus {case_value, 2700, 2840}; // 2770 - 2763 2840-2850
-	Hysteresis<uint16_t, uint16_t> case_plus  {case_value, 540, 700, true}; // 630-614 530-540 (3M)
-
-	Hysteresis<uint16_t, uint16_t> case_minus_al {case_value, 3100, 3250}; // 2770 - 2763
-	Hysteresis<uint16_t, uint16_t> case_plus_al  {case_value, 140, 300, true}; // 630-614
+	Hysteresis<uint16_t, uint16_t> case_minus {case_value, 480, 500};
+	Hysteresis<uint16_t, uint16_t> case_plus  {case_value, 70, 80, true};
 
 	Hysteresis<uint16_t, uint16_t> leak_first_level {leak_value, 350, 400};
 	Hysteresis<uint16_t, uint16_t> leak_second_level{leak_value, 600, 680};

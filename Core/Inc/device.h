@@ -1,6 +1,6 @@
 #pragma once
 
-#include "adc.h"
+#include <adc.h>
 #include "can.h"
 #include "interrupt.h"
 #include "pin.h"
@@ -31,6 +31,10 @@ class Device {
 	Timer delay{1500};
 	Timer blink{500};
 	Timer wait;
+	Timer wait_kz_plus;
+	Timer wait_kz_minus;
+	Timer wait_kz_plus_al;
+	Timer wait_kz_minus_al;
 
 	bool trigger{false};
 	bool delay_{true};
@@ -98,8 +102,58 @@ public:
 
 				can.outID.state.test = check;
 
-				can.outID.state.kz_on_plus = adc.case_plus;
-				can.outID.state.kz_on_minus = adc.case_minus;
+//				can.outID.state.kz_on_plus = adc.case_plus;
+//				can.outID.state.kz_on_minus = adc.case_minus;
+
+/////////////////////////
+				if(adc.case_plus and not wait_kz_plus.isCount()) {
+					wait_kz_plus.start(2'000);
+				} else if (not adc.case_plus and wait_kz_plus.isGreater(200)) {
+					wait_kz_plus.stop();
+					can.outID.state.kz_on_plus = false;
+				}
+
+				if(wait_kz_plus.done()) {
+					wait_kz_plus.stop();
+					can.outID.state.kz_on_plus = true;
+				}
+////////////////////////
+				if (adc.case_minus and not wait_kz_minus.isCount()) {
+					wait_kz_minus.start(2'000);
+				} else if (not adc.case_minus and wait_kz_minus.isGreater(200)) {
+					wait_kz_minus.stop();
+					can.outID.state.kz_on_minus = false;
+				}
+
+				if (wait_kz_minus.done()) {
+					wait_kz_minus.stop();
+					can.outID.state.kz_on_minus = true;
+				}
+///////////////////////
+				if (adc.case_plus_al and not wait_kz_plus_al.isCount()) {
+					wait_kz_plus_al.start(3'000);
+				} else if (not adc.case_plus_al and wait_kz_plus_al.isGreater(200)) {
+					wait_kz_plus_al.stop();
+					can.outID.state.kz_on_plus_al = false;
+				}
+
+				if (wait_kz_plus_al.done()) {
+					wait_kz_plus_al.stop();
+					can.outID.state.kz_on_plus_al = true;
+				}
+////////////////////////
+				if (adc.case_minus_al and not wait_kz_minus_al.isCount()) {
+					wait_kz_plus_al.start(3'000);
+				} else if (not adc.case_minus_al and wait_kz_plus_al.isGreater(200)) {
+					wait_kz_minus_al.stop();
+					can.outID.state.kz_on_minus_al = false;
+				}
+
+				if (wait_kz_minus_al.done()) {
+					wait_kz_minus_al.stop();
+					can.outID.state.kz_on_minus_al = true;
+				}
+///////////////////////
 
 				can.outID.state.level_first = adc.leak_first_level;
 
@@ -111,6 +165,7 @@ public:
 				}
 
 				if(wait.done()) {
+					wait.stop();
 					can.outID.state.level_second = true;
 				}
 
@@ -124,10 +179,16 @@ public:
 			} else {
 				can.outID.state.kz_on_plus = false;
 				can.outID.state.kz_on_minus = false;
+				can.outID.state.kz_on_plus_al = false;
+				can.outID.state.kz_on_minus_al = false;
 
 				can.outID.state.level_first = false;
 				can.outID.state.level_second = false;
 				wait.stop();
+				wait_kz_minus_al.stop();
+				wait_kz_plus_al.stop();
+				wait_kz_minus.stop();
+				wait_kz_plus.stop();
 
 				can.outID.state.leak_value_1 = adc.lk_value() & 0b0000000011111111;
 				can.outID.state.leak_value_0 = (adc.lk_value() >> 8);

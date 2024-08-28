@@ -25,7 +25,9 @@ struct State {
 	bool HV_off         : 1; // 7
 	//
 	bool ignition       : 1; // 8
-	uint16_t res        : 7;
+	bool kz_on_plus_al  : 1; // 9
+	bool kz_on_minus_al : 1; // 10
+	uint16_t res        : 5;
 	uint8_t leak_value_0 : 8;
 	uint8_t leak_value_1 : 8;
 	uint8_t kz_value_0   : 8;
