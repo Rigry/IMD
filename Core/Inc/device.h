@@ -5,6 +5,10 @@
 #include "interrupt.h"
 #include "pin.h"
 
+constexpr float k_adc = 3.33 / 4095;
+constexpr uint16_t k_div_plus = 200; // делители на плате
+constexpr uint16_t k_div_minus = 212;
+
 class Device {
 
 	ADC_& adc;
@@ -14,7 +18,8 @@ class Device {
 	Pin& led_green;
 	Pin& on;
 	Pin& relay;
-	Pin& relay_r;
+	Pin& shunt_plus;
+	Pin& shunt_minus;
 	Pin& test;
 	Pin& norma;
 	Pin& fb_norma;
@@ -40,30 +45,37 @@ class Device {
 	bool delay_{true};
 	bool check{false};
 
+	uint16_t resistance{0};
+
+//	uint16_t voltage_plus{0};
+//	uint16_t voltage_minus{0};
+
 public:
 
-	Device(ADC_& adc, CAN<In_id, Out_id>& can, Pin& led_red, Pin& led_green, Pin& on, Pin& relay, Pin& relay_r, Pin& test, Pin& norma, Pin& fb_norma
+	Device(ADC_& adc, CAN<In_id, Out_id>& can, Pin& led_red, Pin& led_green, Pin& on, Pin& relay, Pin& shunt_plus, Pin& shunt_minus, Pin& test, Pin& norma, Pin& fb_norma
 	     , Pin& first_level, Pin& fb_first, Pin& second_level, Pin& fb_second, Pin& KZ_plus, Pin& fb_KZ_plus
 	     , Pin& KZ_minus, Pin& fb_KZ_minus)
-	: adc {adc}, can {can}, led_red {led_red}, led_green{led_green}, on {on}, relay{relay}, relay_r{relay_r}, test{test}
+	: adc {adc}, can {can}, led_red {led_red}, led_green{led_green}, on {on}, relay{relay}, shunt_plus{shunt_plus}, shunt_minus{shunt_minus}, test{test}
 	, norma{norma}, fb_norma{fb_norma}, first_level{first_level}, fb_first{fb_first}
 	, second_level{second_level}, fb_second{fb_second}, KZ_plus{KZ_plus}, fb_KZ_plus{fb_KZ_plus}
 	, KZ_minus{KZ_minus}, fb_KZ_minus{fb_KZ_minus}
 	{
-		relay = false; relay_r = false;
+		relay = false; shunt_plus = false; shunt_minus = false;
 	}
 
 
 
 	void operator() (){
 
+		voltage_plus  = k_adc * adc.case_plus_value * k_div_plus;
+		voltage_minus = k_adc * adc.case_minus_value * k_div_minus;
+
+	//	shunt_plus = true; //shunt_minus = true;
+
 		if(delay_ and delay.done()) {
 			delay.stop();
 			delay_ = false;
 		}
-
-		relay_r = true;
-
 
 		if(can.is_work()) {
 			can.outID.state.HV_off = can.inID.control.HV_off;
@@ -106,54 +118,29 @@ public:
 //				can.outID.state.kz_on_minus = adc.case_minus;
 
 /////////////////////////
-				if(adc.case_plus and not wait_kz_plus.isCount()) {
-					wait_kz_plus.start(2'000);
-				} else if (not adc.case_plus and wait_kz_plus.isGreater(200)) {
-					wait_kz_plus.stop();
-					can.outID.state.kz_on_plus = false;
-				}
-
-				if(wait_kz_plus.done()) {
-					wait_kz_plus.stop();
-					can.outID.state.kz_on_plus = true;
-				}
+//				if(adc.case_plus and not wait_kz_plus.isCount()) {
+//					wait_kz_plus.start(2'000);
+//				} else if (not adc.case_plus and wait_kz_plus.isGreater(200)) {
+//					wait_kz_plus.stop();
+//					can.outID.state.kz_on_plus = false;
+//				}
+//
+//				if(wait_kz_plus.done()) {
+//					wait_kz_plus.stop();
+//					can.outID.state.kz_on_plus = true;
+//				}
 ////////////////////////
-				if (adc.case_minus and not wait_kz_minus.isCount()) {
-					wait_kz_minus.start(2'000);
-				} else if (not adc.case_minus and wait_kz_minus.isGreater(200)) {
-					wait_kz_minus.stop();
-					can.outID.state.kz_on_minus = false;
-				}
-
-				if (wait_kz_minus.done()) {
-					wait_kz_minus.stop();
-					can.outID.state.kz_on_minus = true;
-				}
-///////////////////////
-				if (adc.case_plus_al and not wait_kz_plus_al.isCount()) {
-					wait_kz_plus_al.start(3'000);
-				} else if (not adc.case_plus_al and wait_kz_plus_al.isGreater(200)) {
-					wait_kz_plus_al.stop();
-					can.outID.state.kz_on_plus_al = false;
-				}
-
-				if (wait_kz_plus_al.done()) {
-					wait_kz_plus_al.stop();
-					can.outID.state.kz_on_plus_al = true;
-				}
-////////////////////////
-				if (adc.case_minus_al and not wait_kz_minus_al.isCount()) {
-					wait_kz_plus_al.start(3'000);
-				} else if (not adc.case_minus_al and wait_kz_plus_al.isGreater(200)) {
-					wait_kz_minus_al.stop();
-					can.outID.state.kz_on_minus_al = false;
-				}
-
-				if (wait_kz_minus_al.done()) {
-					wait_kz_minus_al.stop();
-					can.outID.state.kz_on_minus_al = true;
-				}
-///////////////////////
+//				if (adc.case_minus and not wait_kz_minus.isCount()) {
+//					wait_kz_minus.start(2'000);
+//				} else if (not adc.case_minus and wait_kz_minus.isGreater(200)) {
+//					wait_kz_minus.stop();
+//					can.outID.state.kz_on_minus = false;
+//				}
+//
+//				if (wait_kz_minus.done()) {
+//					wait_kz_minus.stop();
+//					can.outID.state.kz_on_minus = true;
+//				}
 
 				can.outID.state.level_first = adc.leak_first_level;
 
@@ -173,6 +160,11 @@ public:
 				can.outID.state.leak_value_0 = (adc.lk_value() >> 8);
 				can.outID.state.kz_value_1 = adc.kz_value() & 0b0000000011111111;
 				can.outID.state.kz_value_0 = (adc.kz_value() >> 8);
+
+//				can.outID.state.leak_value_1 = voltage_plus & 0b0000000011111111;
+//				can.outID.state.leak_value_0 = (voltage_plus >> 8);
+//				can.outID.state.kz_value_1 = voltage_minus & 0b0000000011111111;
+//				can.outID.state.kz_value_0 = (voltage_minus >> 8);
 
 				led_green = true;
 				led_red = false;
@@ -194,6 +186,14 @@ public:
 				can.outID.state.leak_value_0 = (adc.lk_value() >> 8);
 				can.outID.state.kz_value_1 = adc.kz_value() & 0b0000000011111111;
 				can.outID.state.kz_value_0 = (adc.kz_value() >> 8);
+
+//				can.outID.state.leak_value_1 = voltage_plus & 0b0000000011111111;
+//				can.outID.state.leak_value_0 = (voltage_plus >> 8);
+//				can.outID.state.kz_value_1 = voltage_minus & 0b0000000011111111;
+//				can.outID.state.kz_value_0 = (voltage_minus >> 8);
+
+				led_green = false;
+				led_red = true;
 			}
 
 		} else {
@@ -257,3 +257,30 @@ public:
 
 
 };
+
+
+///////////////////////
+//				if (adc.case_plus_al and not wait_kz_plus_al.isCount()) {
+//					wait_kz_plus_al.start(3'000);
+//				} else if (not adc.case_plus_al and wait_kz_plus_al.isGreater(200)) {
+//					wait_kz_plus_al.stop();
+//					can.outID.state.kz_on_plus_al = false;
+//				}
+//
+//				if (wait_kz_plus_al.done()) {
+//					wait_kz_plus_al.stop();
+//					can.outID.state.kz_on_plus_al = true;
+//				}
+////////////////////////
+//				if (adc.case_minus_al and not wait_kz_minus_al.isCount()) {
+//					wait_kz_plus_al.start(3'000);
+//				} else if (not adc.case_minus_al and wait_kz_plus_al.isGreater(200)) {
+//					wait_kz_minus_al.stop();
+//					can.outID.state.kz_on_minus_al = false;
+//				}
+//
+//				if (wait_kz_minus_al.done()) {
+//					wait_kz_minus_al.stop();
+//					can.outID.state.kz_on_minus_al = true;
+//				}
+///////////////////////

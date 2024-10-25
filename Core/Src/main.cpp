@@ -117,7 +117,7 @@ int main(void)
   decltype(auto) led_green   = Pin{GPIOB, LED_GREEN_Pin      };
   decltype(auto) on          = Pin{GPIOC, ON_Pin             };
   decltype(auto) relay       = Pin{GPIOC, RELAY_Pin          };
-  decltype(auto) relay_r     = Pin{GPIOC, RELAY_R_Pin        };
+//  decltype(auto) relay_r     = Pin{GPIOC, RELAY_R_Pin        };
   decltype(auto) led_can     = Pin{GPIOC, LED_CAN_Pin        };
   decltype(auto) test        = Pin{GPIOA, TEST_Pin           };
 //  decltype(auto) res         = Pin{GPIOA, res_Pin            };
@@ -132,6 +132,8 @@ int main(void)
   decltype(auto) fb_KZ_plus  = Pin{GPIOB, fb_KZ_plus_Pin     };
   decltype(auto) KZ_minus    = Pin{GPIOB, KZ_minus_Pin       };
   decltype(auto) fb_KZ_minus = Pin{GPIOB, fb_KZ_minus_Pin    };
+  decltype(auto) shunt_minus = Pin{GPIOC, Shunt_minus_Pin    };
+  decltype(auto) shunt_plus  = Pin{GPIOC, Shunt_plus_Pin     };
 
 //  State state{};
 
@@ -139,7 +141,7 @@ int main(void)
 
   decltype(auto) can = CAN<In_id, Out_id>{led_can, interrupt_can_rx, 100};
 
-  decltype(auto) device = Device{adc, can, led_red, led_green, on, relay, relay_r, test, norma, fb_norma, first_level, fb_first, second_level, fb_second, KZ_plus, fb_KZ_plus, KZ_minus, fb_KZ_minus};
+  decltype(auto) device = Device{adc, can, led_red, led_green, on, relay, shunt_plus, shunt_minus, test, norma, fb_norma, first_level, fb_first, second_level, fb_second, KZ_plus, fb_KZ_plus, KZ_minus, fb_KZ_minus};
 
   /* USER CODE END 2 */
 
