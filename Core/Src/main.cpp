@@ -139,7 +139,7 @@ int main(void)
 
   decltype(auto) adc = ADC_ {adc_injected_callback, 75};
 
-  decltype(auto) can = CAN<In_id, Out_id>{led_can, interrupt_can_rx, 100};
+  decltype(auto) can = CAN<In_id, Out_id, Out_id_2>{led_can, interrupt_can_rx, 100};
 
   decltype(auto) device = Device{adc, can, led_red, led_green, on, relay, shunt_plus, shunt_minus, test, norma, fb_norma, first_level, fb_first, second_level, fb_second, KZ_plus, fb_KZ_plus, KZ_minus, fb_KZ_minus};
 

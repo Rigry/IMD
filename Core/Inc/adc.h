@@ -7,10 +7,6 @@
 
 enum {LEAK = 1, CASE_MINUS = 2, CASE_PLUS = 3};
 
-constexpr float k_adc = 3.33 / 4095;
-constexpr uint16_t k_div_plus = 200; // делители на плате
-constexpr uint16_t k_div_minus = 212;
-
 class ADC_ : TickSubscriber
 {
 	Interrupt& adc_callback;
@@ -69,8 +65,8 @@ public:
 		   HAL_ADCEx_InjectedStart_IT(&hadc2);
 		}
 
-		voltage_plus  = k_adc * case_plus_value  * k_div_plus;
-		voltage_minus = k_adc * case_minus_value * k_div_minus;
+//		voltage_plus  = k_adc * case_plus_value  * k_div_plus;
+//		voltage_minus = k_adc * case_minus_value * k_div_minus;
 	}
 
 	void start(){ subscribe()  ;}

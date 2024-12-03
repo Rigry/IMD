@@ -8,7 +8,8 @@ struct Control {
 	bool HV_off         : 1;
 	bool ignition       : 1;
 	bool on_off         : 1;
-	uint16_t res        : 12;
+	bool electrobus     : 1;
+	uint16_t res        : 11;
 	uint16_t leak_value : 16;
 	uint16_t kz_value   : 16;
 	uint16_t res3       : 16;
@@ -24,15 +25,22 @@ struct State {
 	bool test_FAILED    : 1; // 6
 	bool HV_off         : 1; // 7
 	//
-	bool ignition       : 1; // 8
-	bool kz_on_plus_al  : 1; // 9
-	bool kz_on_minus_al : 1; // 10
-	uint16_t res        : 5;
-	uint8_t leak_value_0 : 8;
-	uint8_t leak_value_1 : 8;
-	uint8_t kz_value_0   : 8;
-	uint8_t kz_value_1   : 8;
-	uint16_t res3       : 16;
+	bool ignition              : 1; // 8
+	bool electrobus            : 1; // 9
+	uint16_t res               : 6;
+	uint8_t leak_value_0       : 8;
+	uint8_t leak_value_1       : 8;
+	uint8_t kz_plus_value_0    : 8;
+	uint8_t kz_plus_value_1    : 8;
+	uint8_t kz_minus_value_0   : 8;
+	uint8_t kz_minus_value_1   : 8;
+};
+
+struct ID_2 {
+	uint8_t u_plus_value_0    : 8;
+    uint8_t u_plus_value_1    : 8;
+	uint8_t u_minus_value_0   : 8;
+	uint8_t u_minus_value_1   : 8;
 };
 
 struct In_id{
@@ -43,7 +51,11 @@ struct Out_id{
 	State state{0};
 };
 
-template <class InID_t, class OutID_t>
+struct Out_id_2{
+	ID_2 id_2{0};
+};
+
+template <class InID_t, class OutID_t, class OutID_t2>
 class CAN : TickSubscriber
 {
 
@@ -66,6 +78,8 @@ class CAN : TickSubscriber
 
   uint16_t time{0};
   uint16_t time_refresh{0};
+  uint16_t time2{0};
+  uint16_t time_refresh_2{504};
 
   bool work{false};
 
@@ -101,6 +115,7 @@ public:
   {
 	  arInID[0] = arInID[1] = arInID[2] = arInID[3] = arInID[4] = arInID[5] = arInID[6] = arInID[7]= 0;
 	  arOutID[0] = arOutID[1] = arOutID[2] = arOutID[3] = arOutID[4] = arOutID[5] = arOutID[6] = arOutID[7] = 0;
+	  arOutID_2[0] = arOutID_2[1] = arOutID_2[2] = arOutID_2[3] = 0;
 	  subscribed = false;
 //	  if (time_refresh > 0)
 //		  subscribe();
@@ -108,6 +123,7 @@ public:
 
   static const uint8_t InIDQty  = sizeof(InID_t);
   static const uint8_t OutIDQty = sizeof(OutID_t);
+  static const uint8_t OutID2Qty = sizeof(OutID_t2);
 
   union {
 	InID_t inID;
@@ -117,6 +133,11 @@ public:
   union {
     OutID_t outID;
     uint8_t arOutID[OutIDQty];
+  };
+
+  union {
+    OutID_t2 outID_2;
+    uint8_t arOutID_2[OutID2Qty];
   };
 
   using Parent = CAN;
@@ -139,12 +160,27 @@ public:
 		TxHeader.RTR = CAN_RTR_DATA;
 		TxHeader.StdId = ID;
 		TxHeader.TransmitGlobalTime = DISABLE;
-		for (int i = 0; i < TxHeader.DLC; i++) {
+		for (uint32_t i = 0; i < TxHeader.DLC; i++) {
 			TxData[i] = arOutID[i];
 		}
 		HAL_CAN_AddTxMessage(&hcan, &TxHeader, TxData, &TxMailBox);
 		rts = false;
   }
+
+  void transmit_ID_2(){
+ 	  	rts = true;
+ 		TxHeader.DLC = 4;
+ 		TxHeader.ExtId = 0;
+ 		TxHeader.IDE = CAN_ID_STD;
+ 		TxHeader.RTR = CAN_RTR_DATA;
+ 		TxHeader.StdId = 0x002;
+ 		TxHeader.TransmitGlobalTime = DISABLE;
+ 		for (uint32_t i = 0; i < TxHeader.DLC; i++) {
+ 			TxData[i] = arOutID_2[i];
+ 		}
+ 		HAL_CAN_AddTxMessage(&hcan, &TxHeader, TxData, &TxMailBox);
+ 		rts = false;
+   }
 
   void receive(){
 		HAL_CAN_GetRxMessage(&hcan, CAN_RX_FIFO0, &RxHeader, RxData);
@@ -158,10 +194,10 @@ public:
 				inID.control.HV_off   = RxData[0] & (1 << 6);
 				start_transmit();
 			break;
-//			case 0x10:
-//				inID.control.test = RxData[0] & (1 << 0);
-//				start_transmit();
-//			break;
+			case 0x20:
+				inID.control.electrobus = RxData[0] & (1 << 7);
+				start_transmit();
+			break;
 		}
 	}
 
@@ -181,6 +217,10 @@ public:
 	  if (time++ >= time_refresh) {
 		  time = 0;
 		  transmit();
+	  }
+	  if(time2++ >= time_refresh_2) {
+		  time2 = 0;
+		  transmit_ID_2();
 	  }
 	  if(inID.control.on_off) stop_transmit();
   }
