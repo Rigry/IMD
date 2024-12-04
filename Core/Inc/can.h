@@ -8,7 +8,8 @@ struct Control {
 	bool HV_off         : 1;
 	bool ignition       : 1;
 	bool on_off         : 1;
-	uint16_t res        : 12;
+	bool pshu_on        : 1;
+	uint16_t res        : 11;
 	uint16_t leak_value : 16;
 	uint16_t kz_value   : 16;
 	uint16_t res3       : 16;
@@ -155,7 +156,8 @@ public:
 				start_transmit();
 				break;
 			case 0x18:
-				inID.control.HV_off   = RxData[0] & (1 << 6);
+				inID.control.HV_off  = RxData[0] & (1 << 6);
+				inID.control.pshu_on = RxData[6] & (1 << 5);
 				start_transmit();
 			break;
 //			case 0x10:

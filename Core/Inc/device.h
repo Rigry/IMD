@@ -66,6 +66,14 @@ public:
 
 
 		if(can.is_work()) {
+
+			if(can.inID.control.pshu_on and adc.kz_value() < 1750){
+				second_level = true;
+			} else if(not can.inID.control.pshu_on or adc.kz_value() > 1710){
+				second_level = false;
+			}
+
+
 			can.outID.state.HV_off = can.inID.control.HV_off;
 			if(can.outID.state.HV_off == false) {
 				led_red = false;
@@ -104,56 +112,58 @@ public:
 
 //				can.outID.state.kz_on_plus = adc.case_plus;
 //				can.outID.state.kz_on_minus = adc.case_minus;
+				can.outID.state.kz_on_plus = false;
+				can.outID.state.kz_on_minus = false;
 
 /////////////////////////
-				if(adc.case_plus and not wait_kz_plus.isCount()) {
-					wait_kz_plus.start(2'000);
-				} else if (not adc.case_plus and wait_kz_plus.isGreater(200)) {
-					wait_kz_plus.stop();
-					can.outID.state.kz_on_plus = false;
-				}
-
-				if(wait_kz_plus.done()) {
-					wait_kz_plus.stop();
-					can.outID.state.kz_on_plus = true;
-				}
-////////////////////////
-				if (adc.case_minus and not wait_kz_minus.isCount()) {
-					wait_kz_minus.start(2'000);
-				} else if (not adc.case_minus and wait_kz_minus.isGreater(200)) {
-					wait_kz_minus.stop();
-					can.outID.state.kz_on_minus = false;
-				}
-
-				if (wait_kz_minus.done()) {
-					wait_kz_minus.stop();
-					can.outID.state.kz_on_minus = true;
-				}
-///////////////////////
-				if (adc.case_plus_al and not wait_kz_plus_al.isCount()) {
-					wait_kz_plus_al.start(3'000);
-				} else if (not adc.case_plus_al and wait_kz_plus_al.isGreater(200)) {
-					wait_kz_plus_al.stop();
-					can.outID.state.kz_on_plus_al = false;
-				}
-
-				if (wait_kz_plus_al.done()) {
-					wait_kz_plus_al.stop();
-					can.outID.state.kz_on_plus_al = true;
-				}
-////////////////////////
-				if (adc.case_minus_al and not wait_kz_minus_al.isCount()) {
-					wait_kz_plus_al.start(3'000);
-				} else if (not adc.case_minus_al and wait_kz_plus_al.isGreater(200)) {
-					wait_kz_minus_al.stop();
-					can.outID.state.kz_on_minus_al = false;
-				}
-
-				if (wait_kz_minus_al.done()) {
-					wait_kz_minus_al.stop();
-					can.outID.state.kz_on_minus_al = true;
-				}
-///////////////////////
+//				if(adc.case_plus and not wait_kz_plus.isCount()) {
+//					wait_kz_plus.start(2'000);
+//				} else if (not adc.case_plus and wait_kz_plus.isGreater(200)) {
+//					wait_kz_plus.stop();
+//					can.outID.state.kz_on_plus = false;
+//				}
+//
+//				if(wait_kz_plus.done()) {
+//					wait_kz_plus.stop();
+//					can.outID.state.kz_on_plus = true;
+//				}
+//////////////////////////
+//				if (adc.case_minus and not wait_kz_minus.isCount()) {
+//					wait_kz_minus.start(2'000);
+//				} else if (not adc.case_minus and wait_kz_minus.isGreater(200)) {
+//					wait_kz_minus.stop();
+//					can.outID.state.kz_on_minus = false;
+//				}
+//
+//				if (wait_kz_minus.done()) {
+//					wait_kz_minus.stop();
+//					can.outID.state.kz_on_minus = true;
+//				}
+/////////////////////////
+//				if (adc.case_plus_al and not wait_kz_plus_al.isCount()) {
+//					wait_kz_plus_al.start(3'000);
+//				} else if (not adc.case_plus_al and wait_kz_plus_al.isGreater(200)) {
+//					wait_kz_plus_al.stop();
+//					can.outID.state.kz_on_plus_al = false;
+//				}
+//
+//				if (wait_kz_plus_al.done()) {
+//					wait_kz_plus_al.stop();
+//					can.outID.state.kz_on_plus_al = true;
+//				}
+//////////////////////////
+//				if (adc.case_minus_al and not wait_kz_minus_al.isCount()) {
+//					wait_kz_plus_al.start(3'000);
+//				} else if (not adc.case_minus_al and wait_kz_plus_al.isGreater(200)) {
+//					wait_kz_minus_al.stop();
+//					can.outID.state.kz_on_minus_al = false;
+//				}
+//
+//				if (wait_kz_minus_al.done()) {
+//					wait_kz_minus_al.stop();
+//					can.outID.state.kz_on_minus_al = true;
+//				}
+/////////////////////////
 
 				can.outID.state.level_first = adc.leak_first_level;
 
@@ -171,8 +181,10 @@ public:
 
 				can.outID.state.leak_value_1 = adc.lk_value() & 0b0000000011111111;
 				can.outID.state.leak_value_0 = (adc.lk_value() >> 8);
-				can.outID.state.kz_value_1 = adc.kz_value() & 0b0000000011111111;
-				can.outID.state.kz_value_0 = (adc.kz_value() >> 8);
+				can.outID.state.kz_value_1 = 0;
+				can.outID.state.kz_value_0 = 0;
+//				can.outID.state.kz_value_1 = adc.kz_value() & 0b0000000011111111;
+//				can.outID.state.kz_value_0 = (adc.kz_value() >> 8);
 
 				led_green = true;
 				led_red = false;
@@ -185,15 +197,17 @@ public:
 				can.outID.state.level_first = false;
 				can.outID.state.level_second = false;
 				wait.stop();
-				wait_kz_minus_al.stop();
-				wait_kz_plus_al.stop();
-				wait_kz_minus.stop();
-				wait_kz_plus.stop();
+//				wait_kz_minus_al.stop();
+//				wait_kz_plus_al.stop();
+//				wait_kz_minus.stop();
+//				wait_kz_plus.stop();
 
 				can.outID.state.leak_value_1 = adc.lk_value() & 0b0000000011111111;
 				can.outID.state.leak_value_0 = (adc.lk_value() >> 8);
-				can.outID.state.kz_value_1 = adc.kz_value() & 0b0000000011111111;
-				can.outID.state.kz_value_0 = (adc.kz_value() >> 8);
+				can.outID.state.kz_value_1 = 0;
+				can.outID.state.kz_value_0 = 0;
+//				can.outID.state.kz_value_1 = adc.kz_value() & 0b0000000011111111;
+//				can.outID.state.kz_value_0 = (adc.kz_value() >> 8);
 			}
 
 		} else {
@@ -214,39 +228,39 @@ public:
 
 				on ? adc.start() : adc.stop();
 
-				KZ_plus  = adc.case_plus;
-				KZ_minus = adc.case_minus;
+//				KZ_plus  = adc.case_plus;
+//				KZ_minus = adc.case_minus;
 
 				first_level  = adc.leak_first_level;
 				second_level = adc.leak_second_level;
 
-				if(fb_norma ^ norma) {
-					norma = false;
-					trigger = true;
-				} else if(fb_first ^ first_level) {
-					first_level = false;
-					trigger = true;
-				} else if(fb_second ^ second_level) {
-					second_level = false;
-					trigger = true;
-				} else if(fb_KZ_plus ^ KZ_plus) {
-					KZ_plus = false;
-					trigger = true;
-				} else if(fb_KZ_minus ^ KZ_minus) {
-					KZ_minus = false;
-					trigger = true;
-				} else  {
-					trigger = false;
-				}
-
-				if(not trigger)
-					norma = not (adc.case_plus | adc.case_minus | adc.leak_first_level | adc.leak_second_level);
-				else
-					norma ^= blink.event();
-
-				led_red = trigger;
-
-				led_green = not led_red;
+//				if(fb_norma ^ norma) {
+//					norma = false;
+//					trigger = true;
+//				} else if(fb_first ^ first_level) {
+//					first_level = false;
+//					trigger = true;
+//				} else if(fb_second ^ second_level) {
+//					second_level = false;
+//					trigger = true;
+//				} else if(fb_KZ_plus ^ KZ_plus) {
+//					KZ_plus = false;
+//					trigger = true;
+//				} else if(fb_KZ_minus ^ KZ_minus) {
+//					KZ_minus = false;
+//					trigger = true;
+//				} else  {
+//					trigger = false;
+//				}
+//
+//				if(not trigger)
+//					norma = not (adc.case_plus | adc.case_minus | adc.leak_first_level | adc.leak_second_level);
+//				else
+//					norma ^= blink.event();
+//
+//				led_red = trigger;
+//
+//				led_green = not led_red;
 
 			}
 
